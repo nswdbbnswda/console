@@ -207,11 +207,35 @@ void Server::sendCmd(QString strCmd)
    }
   std::string chatContext;//聊天内容
   chatContext = qstrContext.toStdString();
-  //std::cout<<std::endl<<":";
-  //std::getline(std::cin,chatContext);//从输入流获得聊天内容
+
+   char *buf = new char[strlen(chatContext.c_str())+1];//分配一个块内存空间
+   strcpy(buf, chatContext.c_str());//把读进来的字符串转换成 char*类型
+   char seg[] = " ";//定义分割符
+   char charlist[50][50]={""};//创建一个数组用来存放分割后的字符串数据
+   int i =0;
+   char *substr= strtok(buf, seg);///?
+   while(substr != NULL) {
+          strcpy(charlist[i],substr);//把这个字符串放到二维数组的第一行
+          i++;
+
+         substr = strtok(NULL,seg);
+   }
+
+   QString program1 = "D:/AutoSend/AutoSend.exe";//要启动的另外一个进程的路径
+   QStringList arguments1;//启动线程所需要的参数
+   arguments1 <<charlist[0]<<charlist[1]<<charlist[2]; //添加参数// s 5000 G:/music
+   QProcess::startDetached(program1,arguments1);
+
+  //    m_pSocket->write(charlist[1]) ;//把端口号扔给接收端
+  //    m_pSocket->waitForBytesWritten();
+  // m_pSocket[iCurNum].write(str1.c_str());
+  // m_pSocket[iCurNum].waitForBytesWritten();
+
   std::string numSocket = qstrIpAddr.toStdString();//获得套接字号码
-  m_pSocket[ipMap[numSocket]].write(chatContext.c_str());//发送聊天内容
+  m_pSocket[ipMap[numSocket]].write(charlist[1]);//把端口号扔给接收端
   m_pSocket[ipMap[numSocket]].waitForBytesWritten();//等待发送完毕
+
+
  }
 
 
@@ -219,25 +243,13 @@ void Server::sendCmd(QString strCmd)
  void Server::receiveData()
  {
      QTcpSocket *socket = (QTcpSocket *)sender();//获得信号的发送者
+     QHostAddress ipaddr = socket->peerAddress();//获取客户端的IP地址
      QByteArray temp1;
      temp1 = socket->readAll();
      socket->waitForBytesWritten();
-     rwLock.lockForWrite();
-     std::cout<<temp1.data()<<std::endl;
-     rwLock.unlock();
-
-     // temp1 =   m_pSocket[iCurNum].readAll();
-     //temp1 = QObject::sender()->readAll();
-     // QObject::sender()->waitForBytesWritten();
-     // qDebug()<<temp1;
-
-     // std::cout<<iCurNum<<std::endl;
-     //   if(temp1 == "AS"){
-     //        emit   startSendProcess();//发射启动进程的信号
-     //   }
-     //   QByteArray temp1 =  m_pSocket->readAll();
-     //   QString program1 = "G:/qt/build-AutoSend-Desktop_Qt_5_6_2_MSVC2013_64bit-Release/release/AutoSend.exe";//要启动的另外一个进程的路径
-     //   QStringList arguments1;//启动线程所需要的参数
-     //   arguments1 <<"c"<<"127.0.0.1"<<temp1.toStdString().c_str(); //添加参数
-     //   QProcess::startDetached(program1,arguments1);
+    // QString program1 = "G:/qt/build-AutoSend-Desktop_Qt_5_6_2_MSVC2013_64bit-Release/release/AutoSend.exe";//要启动的另外一个进程的路径
+      QString program1 = "D:/AutoSend/AutoSend.exe";//要启动的另外一个进程的路径
+     QStringList arguments1;//启动线程所需要的参数
+     arguments1 <<"c"<<ipaddr.toString()<<temp1.data(); //添加参数
+     QProcess::startDetached(program1,arguments1);
  }

@@ -82,15 +82,6 @@ void Iter::interacter()
         else if (!strcmp(com, "talk") ||
                  !strcmp(com, "tk"))
         {
-         std::string chatContext;//会话内容
-         std::string chatIpAddr;//会话地址
-         std::cout<<"IP:";
-         std::getline(std::cin,chatIpAddr);//获得要对话的IP地址
-         std::cout<<":";
-         std::getline(std::cin,chatContext);//获得要对话的内容
-         QString qstrIp = QString::fromStdString(chatIpAddr);//把要对话的IP地址转换成QString格式
-         QString qstrContext = QString::fromStdString(chatContext);//把要对话的IP地址转换成QString格式
-         emit ipChat(qstrIp,qstrContext);
 
 
         }
@@ -98,37 +89,17 @@ void Iter::interacter()
                  !strcmp(com, "sf"))
         {
 
-            //                std::string sendContext("hello,world!");
-            //                std::string numSocket;
-            //               // std::cout<<":";
-            //                std::getline(std::cin,numSocket);//选择你要发送的目标对象
-            //               // std::cout<<myIpMap[numSocket]<<std::endl;
+            std::string chatContext;//会话内容
+            std::string chatIpAddr;//会话地址
+            std::cout<<"IP:";
+            std::getline(std::cin,chatIpAddr);//获得要对话的IP地址
+            std::cout<<":";
+            std::getline(std::cin,chatContext);//获得要对话的内容
+            QString qstrIp = QString::fromStdString(chatIpAddr);//把要对话的IP地址转换成QString格式
+            QString qstrContext = QString::fromStdString(chatContext);//把要对话的IP地址转换成QString格式
+            emit ipChat(qstrIp,qstrContext);
 
 
-            //                std::map<std::string,int>::iterator it = myIpMap.find(numSocket);//看看map中是否有这个地址
-            //                //先在主动连接线程中找
-            //                if(it!=myIpMap.end()){
-
-            //                  m_pSocket[it->second].write(sendContext.c_str());
-            //                  m_pSocket[it->second].waitForBytesWritten();//如果有找到套接字
-            //                }
-            //                //在被动连接的套接字中找
-            //               else if(isFindSuc(Server::getIpMap(),numSocket)){
-            //                    //如果找到了
-            //                    QString qstr;
-            //                    qstr = QString::fromStdString(numSocket);
-            //                    emit serverSend(qstr);
-
-            //                }
-            //                //都没找到
-            //                else{
-
-            //                    //如果没有打印一条提示消息
-            //                  //std::cout<<"No exist  "<<numSocket<<std::endl;
-
-
-
-            //                }
         }
         else if (!strcmp(com, "getfile") ||
                  !strcmp(com, "gf"))
@@ -150,37 +121,6 @@ void Iter::interacter()
           std::getline(std::cin,ipAddr);
           QString qstrip = QString::fromStdString(ipAddr);
           emit addTcp(qstrip);//发送给主体IP地址
-
-
-
-            //                 //添加连接
-            //                if(iCurNum < sockNum){
-
-            //                    std::string ipAddr;
-            //                    std::cout<<"IP:";
-            //                    std::getline(std::cin,ipAddr);
-
-            //                    m_pSocket[iCurNum].connectToHost(QHostAddress(ipAddr.c_str()),5000);//发起连接
-
-            //                    if(m_pSocket->waitForConnected()){
-            //                        std::cout<<"Successfully connected to "<<ipAddr<<std::endl;
-
-            //                        //如果连接成功把这个IP地址记录下来
-            //                        myIpMap[ipAddr] = iCurNum;    //这个地址所对应的套接字就是m_oSocekt[iCurNum]
-            //                        iCurNum++;
-
-
-            //                    }
-            //                    else{
-            //                        std::cout<<"Failed to connect to  "<<ipAddr<<std::endl;
-            //                    }
-
-            //                }
-            //                else{
-            //                    std::cout<<"The sockets is MaxNumber!"<<std::endl;
-            //                }
-
-
 
         }
         else if (!strcmp(com, "help") ||
