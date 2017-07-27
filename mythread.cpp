@@ -21,10 +21,7 @@ void MyThread::run()
 {
 
 //qDebug()<<"This is My Thread ID:"<<QThread::currentThreadId();
-
-
 exec();
-
 }
 
 

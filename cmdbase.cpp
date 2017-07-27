@@ -20,11 +20,11 @@ CmdBase::~CmdBase()
 
 void CmdBase::inputCmd()
 {
-    std::string line;
-    QString qstr;
-    while(std::getline(std::cin,line)){
-        qstr = QString::fromStdString(line);
-        emit hasNewInput(qstr) ;
+//    std::string line;
+//    QString qstr;
+//    while(std::getline(std::cin,line)){
+//        qstr = QString::fromStdString(line);
+//        emit hasNewInput(qstr) ;
 
-    }
+//    }
 }
