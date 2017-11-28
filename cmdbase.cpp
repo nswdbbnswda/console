@@ -18,13 +18,7 @@ CmdBase::~CmdBase()
 
 }
 
-void CmdBase::inputCmd()
+void CmdBase::InputCmd()
 {
-//    std::string line;
-//    QString qstr;
-//    while(std::getline(std::cin,line)){
-//        qstr = QString::fromStdString(line);
-//        emit hasNewInput(qstr) ;
 
-//    }
 }

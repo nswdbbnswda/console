@@ -13,9 +13,9 @@ public:
     explicit MyThread();
     virtual ~MyThread();
 protected:
-    virtual  void run();
+    virtual void    run();
 signals:
-    void hasNewInput(std::string strCmd);
+    void    HasNewInput(std::string strCmd);
 private:
     CmdBase *cmdInputer;
 

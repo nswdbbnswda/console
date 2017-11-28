@@ -12,9 +12,6 @@ protected:
     void incomingConnection(qintptr socketDescriptor);
 signals:
     void newClientConnection(qintptr socketDescriptor);
-
-
-
 };
 
 #endif // MYTCPSEVER_H

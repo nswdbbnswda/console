@@ -5,17 +5,7 @@
 
 Iter::Iter()
 {
-//    addConThread = new MyThread;//创建主动连接线程
-//    tcpAdder = new Client;//创建主动添加TCP连接的对象
-//    tcpAdder->moveToThread(addConThread);//把这个对象移动到子线程中
-//    QObject::connect(this, SIGNAL(sigAddTcpThread()), tcpAdder, SLOT(addNewTcp())); // 这里的slot()函数，相当于run()函数的作用
-//    QObject::connect(this,SIGNAL(addTcp(QString)),tcpAdder,SLOT(slot(QString)));//cad命令时,执行槽tcpAdder 的slot槽
-//    addConThread->start();
-//    emit sigAddTcpThread();//启动主动添加TCP的线程 addConThread
 
-//    rwLock.lockForWrite();
-//    qDebug()<<QThread::currentThreadId()<<"Inter constructor!";
-//    rwLock.unlock();
 
 
 }
@@ -31,37 +21,25 @@ Iter::~Iter()
 }
 
 
-void Iter::interacter()
+void Iter::Interacter()
 {
-   // int iCurNum = 0;
-   // int sockNum = 100;
-    //QTcpSocket m_pSocket[100];//创建100个套接字;
-
-    //std::map<std::string,int> myIpMap;
-//      rwLock.lockForWrite();
-//      qDebug()<<QThread::currentThreadId()<<"Inter";
-//      rwLock.unlock();
-
-
     char com[20], *fileName;
     int count;
 
     while(1)
     {
         rwLock.tryLockForRead();
-       // printf("\n(AutoSend):");
         std::cout<<"(AutoSend):";
         rwLock.unlock();
 
-
         fgets(com, sizeof(com), stdin);//
-        transfStr(com, 1); //去掉开头结尾空白字符，变成全小写
+        TransfStr(com, 1); //去掉开头结尾空白字符，变成全小写
 
         if (!strcmp(com, "list") ||
                 !strcmp(com, "ls"))
         {
                   //显示所有的TCP连接
-                  if(Server::getInstance()->showIpList()){
+                  if(MainWin::GetInstance()->ShowIpList()){
                     }
                   else{
 
@@ -88,7 +66,6 @@ void Iter::interacter()
         else if (!strcmp(com, "sendfile") ||
                  !strcmp(com, "sf"))
         {
-
             std::string chatContext;//会话内容
             std::string chatIpAddr;//会话地址
             std::cout<<"IP:";
@@ -97,7 +74,7 @@ void Iter::interacter()
             std::getline(std::cin,chatContext);//获得要对话的内容
             QString qstrIp = QString::fromStdString(chatIpAddr);//把要对话的IP地址转换成QString格式
             QString qstrContext = QString::fromStdString(chatContext);//把要对话的IP地址转换成QString格式
-            emit ipChat(qstrIp,qstrContext);
+            emit IpChat(qstrIp,qstrContext);
 
 
         }
@@ -109,7 +86,6 @@ void Iter::interacter()
         else if (!strcmp(com, "ceaseSend") ||
                  !strcmp(com, "cs"))
         {
-
         }
 
         else if (!strcmp(com, "cad") ||
@@ -118,15 +94,21 @@ void Iter::interacter()
 
           std::cout<<"IP:";
           std::string ipAddr;
-          std::getline(std::cin,ipAddr);
+          std::getline(std::cin,ipAddr);//获得IP地址
           QString qstrip = QString::fromStdString(ipAddr);
-          emit addTcp(qstrip);//发送给主体IP地址
+          emit AddTcp(qstrip);//发送给主体IP地址
 
         }
         else if (!strcmp(com, "help") ||
                  !strcmp(com, "h"))
         {
             printf(IMHELP);
+        }
+
+        else if (!strcmp(com, "version") ||
+                 !strcmp(com, "v"))
+        {
+            std::cout<<VERSION<<std::endl;
         }
 
 
@@ -141,25 +123,18 @@ void Iter::interacter()
         {
             system("dir");
         }
-
         else
         {
             std::cout<<com<<": command not found"<<std::endl;
 
-
         }
-
     }
 
 }
 
 
 
-
-
-
-
-void Iter::transfStr(char *dest, int flag)
+void Iter::TransfStr(char *dest, int flag)
 {
     char *ptr;
     int len;
@@ -182,9 +157,7 @@ void Iter::transfStr(char *dest, int flag)
 }
 
 
-
-
-bool Iter::isFindSuc(std::map<std::string, int> map, std::string key)
+bool Iter::IsFindSuc(std::map<std::string, int> map, std::string key)
 {
 
     std::map<std::string,int>::iterator it = map.find(key);//看看map中是否有这个地址

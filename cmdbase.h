@@ -6,12 +6,12 @@ class CmdBase : public QObject
 {
     Q_OBJECT
 public:
-   explicit  CmdBase();
+    explicit CmdBase();
     virtual ~CmdBase();
 public slots:
-    void inputCmd();
+    void InputCmd();
 signals:
-    void hasNewInput(QString strInput);
+    void HasNewInput(QString strInput);
 };
 
 #endif // CMDBASE_H

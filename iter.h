@@ -1,10 +1,9 @@
 #ifndef ITER_H
 #define ITER_H
-#include"client.h"
 #include<iostream>
 #include<stdio.h>
 #include"cmdbase.h"
-#include"server.h"
+#include"mainwin.h"
 #include<QTcpSocket>
 #include"mytcpsever.h"
 #include <QCoreApplication>
@@ -15,7 +14,7 @@
   "Commands: help(h) list(ls) talk(tk) sendfile(sf)\n"\
   "Commands: getfile(gf) refresh(rf) ceaseSend(cs) quit(q)\n"
 
-
+#define VERSION  ("version0.11")
 
 
 class Iter : public QObject
@@ -24,19 +23,17 @@ class Iter : public QObject
 public:
     explicit Iter();
     virtual ~Iter();
-     void transfStr(char *dest, int flag);
-    bool isFindSuc(std::map<std::string,int> map,std::string key);//判断map里面是否有key
+    void    TransfStr(char *dest, int flag);
+    bool    IsFindSuc(std::map<std::string,int> map,std::string key);//判断map里面是否有key
+public:
     MyThread *addConThread;
 signals:
-    void serverSend(QString);
-    void sigAddTcpThread();
-    void addTcp(QString);
-    void ipChat(QString,QString);
-private:
-
-
+    void    MainWinSend(QString);
+    void    SigAddTcpThread();
+    void    AddTcp(QString);
+    void    IpChat(QString,QString);
 public slots:
-    void interacter();//用户交互
+    void    Interacter();//用户交互
 };
 
 
