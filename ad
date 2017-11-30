@@ -1,0 +1,29 @@
+[33mcommit 9afc454362e8f011ec9a0069d836b0d314ccd0ae[m
+Author: lichao <lichao@qq.com>
+Date:   Tue Nov 28 09:04:06 2017 +0800
+
+    调整代码整洁度采用标准规范命名和缩进
+
+[33mcommit 58fc49ce6b9d8aee96195db8ffe8bd76378adda9[m
+Author: lichao <lichao@qq.com>
+Date:   Thu Jul 27 16:49:46 2017 +0800
+
+    本版把聊天功能改为传输文件，添加了启动AutoSend发送进程模块
+
+[33mcommit 4d976d349eb887196dfb9d843a6819ee9443ddf7[m
+Author: lichao <lichao@qq.com>
+Date:   Thu Jul 27 10:07:18 2017 +0800
+
+    本版能进行全对等TCP通讯，支持添加IP列表，实现聊天功能，命令行版本QQ!革命版
+
+[33mcommit 19174c761b31079e9834a75fe54320c8afede718[m
+Author: lichao <lichao@qq.com>
+Date:   Tue Jul 18 15:04:13 2017 +0800
+
+    第一版本，能进行双向通讯，非全对等，发送命令启动进程
+
+[33mcommit 32e9956d6a5dde98832a4551e29f278c54f44f46[m
+Author: NSWDBNNSWDA <nswdbbnswda@163.com>
+Date:   Tue Jul 18 14:13:38 2017 +0800
+
+    Initial commit

@@ -8,6 +8,7 @@
 #include"mytcpsever.h"
 #include"mythread.h"
 #include<QReadWriteLock>
+#include<QProcess>
 
 extern QReadWriteLock rwLock;
 
@@ -19,12 +20,11 @@ class MainWin : public QObject
 private:
     explicit MainWin();
     MyTcpSever *server;
-    QTcpSocket m_pSocket[100];
     int socketDescriptor;
     Iter *iter;
     MyThread *iterThread;
-    static std::map<std::string,int> ipMap;
-    int iCurNum;
+    static std::map<std::string,QTcpSocket*> ipMap;
+    std::map<QString,QProcess *> pObjectProcess;//进程指针容器
 public:
     virtual ~MainWin();
     static MainWin *GetInstance()
@@ -36,22 +36,25 @@ public:
         return m_pInstance;
     }
     bool    ShowIpList();
-    static std::map<std::string,int> GetIpMap(){
+    static std::map<std::string,QTcpSocket*> GetIpMap(){
         return ipMap;
     }
 public:
     static MainWin *m_pInstance;
 private:
     bool    IsIpExist(const QString &qstr);
+    void    SendControlCommand(const QString &iPAddr,const char *pCmd);
+    void    StartSendProcess(const QStringList &qslt );
 public slots:
-    void    EvReceiveData();
-    void    EvNewConnectionSlot(qintptr ptr1);
-    void    EvSendCmd(QString strCmd);
-    void    EvStartSendProcess();
-    void    EvConTcp(QString qstrIp);//连接指定的IP地址
-    void    IpChatSlot(QString qstrIpAddr,QString qstrContext);
+    void    EvReceiveCommand();
+    void    EvNewConnection(qintptr ptr1);
+    void    EvProStart();//启动了子进程
+    void    EvProExit();//退出了子进程
+    bool    EvConTcp(QString qstrIp);//连接指定的IP地址
+    void    EvSendFile(QString qstrIpAddr,QString qstrContext);
+    void    EvLeaveProc();//离线处理
 signals:
-    void    StartSendProcess();//启动发送文件进程
+
     void    Sig();
 };
 

@@ -31,7 +31,8 @@ signals:
     void    MainWinSend(QString);
     void    SigAddTcpThread();
     void    AddTcp(QString);
-    void    IpChat(QString,QString);
+    void    SendFile(QString,QString);
+
 public slots:
     void    Interacter();//用户交互
 };

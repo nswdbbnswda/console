@@ -7,11 +7,14 @@
 #include"iter.h"
 #include<QObject>
 
+
+
+
 using namespace std;
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+     QCoreApplication a(argc, argv);
      MainWin::GetInstance();
      return a.exec();
 }

@@ -1,8 +1,6 @@
 #include "iter.h"
 #include<string>
 
-
-
 Iter::Iter()
 {
 
@@ -74,7 +72,7 @@ void Iter::Interacter()
             std::getline(std::cin,chatContext);//获得要对话的内容
             QString qstrIp = QString::fromStdString(chatIpAddr);//把要对话的IP地址转换成QString格式
             QString qstrContext = QString::fromStdString(chatContext);//把要对话的IP地址转换成QString格式
-            emit IpChat(qstrIp,qstrContext);
+            emit SendFile(qstrIp,qstrContext);
 
 
         }
@@ -83,15 +81,16 @@ void Iter::Interacter()
         {
 
         }
-        else if (!strcmp(com, "ceaseSend") ||
-                 !strcmp(com, "cs"))
+        else if (!strcmp(com, "cat"))
+
         {
+
         }
+
 
         else if (!strcmp(com, "cad") ||
                  !strcmp(com, "c"))
         {
-
           std::cout<<"IP:";
           std::string ipAddr;
           std::getline(std::cin,ipAddr);//获得IP地址
