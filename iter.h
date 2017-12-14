@@ -31,7 +31,7 @@ signals:
     void    MainWinSend(QString);
     void    SigAddTcpThread();
     void    AddTcp(QString);
-    void    SendFile(QString,QString);
+    void    SendFile(QString,QStringList);
 
 public slots:
     void    Interacter();//用户交互

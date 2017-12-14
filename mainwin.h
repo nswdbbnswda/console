@@ -10,6 +10,9 @@
 #include<QReadWriteLock>
 #include<QProcess>
 
+#include<QCommandLineOption>
+#include<QCommandLineParser>
+
 extern QReadWriteLock rwLock;
 
 class Iter;
@@ -51,7 +54,7 @@ public slots:
     void    EvProStart();//启动了子进程
     void    EvProExit();//退出了子进程
     bool    EvConTcp(QString qstrIp);//连接指定的IP地址
-    void    EvSendFile(QString qstrIpAddr,QString qstrContext);
+    void    EvSendFile(QString qstrIpAddr,QStringList qstrContext);
     void    EvLeaveProc();//离线处理
 signals:
 

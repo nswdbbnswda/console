@@ -67,12 +67,16 @@ void Iter::Interacter()
             std::string chatContext;//会话内容
             std::string chatIpAddr;//会话地址
             std::cout<<"IP:";
+
             std::getline(std::cin,chatIpAddr);//获得要对话的IP地址
             std::cout<<":";
-            std::getline(std::cin,chatContext);//获得要对话的内容
             QString qstrIp = QString::fromStdString(chatIpAddr);//把要对话的IP地址转换成QString格式
+
+            std::getline(std::cin,chatContext);//获得要对话的内容
             QString qstrContext = QString::fromStdString(chatContext);//把要对话的IP地址转换成QString格式
-            emit SendFile(qstrIp,qstrContext);
+
+            QStringList fonts = qstrContext.split(" ");//以空格为分隔符
+            emit SendFile(qstrIp,fonts);
 
 
         }

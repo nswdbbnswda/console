@@ -26,7 +26,7 @@ MainWin::MainWin()
     iter->moveToThread(iterThread);
 
     //交互信号与槽函数连接区域
-    QObject::connect(iter,SIGNAL(SendFile(QString,QString)),this,SLOT(EvSendFile(QString,QString)));//发送文件
+    QObject::connect(iter,SIGNAL(SendFile(QString,QStringList)),this,SLOT(EvSendFile(QString,QStringList)));//发送文件
     QObject::connect(iter,SIGNAL(AddTcp(QString)),this,SLOT(EvConTcp(QString)));//当执行cad命令的时候，就执行连接TCP动作
     QObject::connect(this, SIGNAL(Sig()), iter, SLOT(Interacter())); // 这里的slot()函数，相当于run()函数的作用
 
@@ -89,16 +89,20 @@ void MainWin::EvNewConnection(qintptr ptr1)
 //启动发送文件进程
 void MainWin::StartSendProcess(const QStringList &qslt )
 {
-
     QString program1 = QCoreApplication::applicationDirPath() + "/AutoSend.exe";//待启动程序路径
-    //每启动一个进程都为这个进程创建一个对象
-    QProcess *tmp = new QProcess;
+//    //每启动一个进程都为这个进程创建一个对象
+//    QProcess *tmp = new QProcess;
+//    connect(tmp,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(EvProExit()));//子进程启动了
+//    connect(tmp,SIGNAL(started()),this,SLOT(EvProStart()));//子进程结束了
+//    tmp->start(program1, qslt);
+//    tmp->waitForStarted();//等待进程启动
 
-    connect(tmp,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(EvProExit()));//子进程启动了
-    connect(tmp,SIGNAL(started()),this,SLOT(EvProStart()));//子进程结束了
-    tmp->start(program1, qslt);
-    tmp->waitForStarted();//等待进程启动
+      QProcess::startDetached(program1,qslt);//启动AutoSend
 }
+
+
+
+
 
 
 //发起TCP连接
@@ -124,30 +128,19 @@ bool MainWin::EvConTcp(QString qstrIp)
 
 
 //处理"sf"事件
-void MainWin::EvSendFile(QString qstrIpAddr,QString qstrContext)
+void MainWin::EvSendFile(QString qstrIpAddr,QStringList qstrContext)
 {
     if(!IsIpExist(qstrIpAddr)){//如果map中没有这个地址,退出
         std::cout<<"The address does not exist"<<std::endl;//提示地址不存在，不能进行命令发送
         return;
     }
-    std::string  CommandContext;//命令内容
-    CommandContext = qstrContext.toStdString();
-    char *buf = new char[strlen( CommandContext.c_str())+1];//分配一个块内存空间
-    strcpy(buf,  CommandContext.c_str());//把读进来的字符串转换成 char*类型
-    char seg[] = " ";//定义分割符
-    char charlist[50][50]={""};//创建一个数组用来存放分割后的字符串数据
-    int i =0;
-    char *substr= strtok(buf, seg);
-    while(substr != NULL) {
-        strcpy(charlist[i],substr);//把这个字符串放到二维数组的第一行
-        i++;
-        substr = strtok(NULL,seg);
-    }
+    QString qsPort;
     QStringList arguments1;
-    arguments1 <<charlist[0]<<charlist[1]<<charlist[2]; //添加参数// s 5000 G:/music
+    arguments1<<qstrContext;
+
+    qsPort = arguments1.at(arguments1.indexOf("-p") + 1);//找到端口号
     StartSendProcess(arguments1);//启动本地文件发送进程
-    SendControlCommand(qstrIpAddr,charlist[1]);//发送端口号
-    delete[] buf;
+    SendControlCommand(qstrIpAddr,qsPort.toStdString().data());//发送端口号
 }
 
 
@@ -184,13 +177,16 @@ void MainWin::EvProExit()
 //接收指令
 void MainWin::EvReceiveCommand()
 {
+
+    //接收短消息 并且解析出IP地址和端口号码
     QTcpSocket *socket = (QTcpSocket *)sender();//获得信号的发送者
     QHostAddress ipaddr = socket->peerAddress();//获取客户端的IP地址
     QByteArray temp1;
     temp1 = socket->readAll();
 
-    QStringList arguments1;//启动线程所需要的参数
-    arguments1 <<"c"<<ipaddr.toString()<<temp1.data(); //添加参数
+    //启动接收进程
+    QStringList arguments1;//默认保存到应用程序根目录
+    arguments1 <<"-c"<<"-i"<<ipaddr.toString()<<"-p"<<temp1.data()<<"-d"<<QCoreApplication::applicationDirPath() + "/DOWNLOAD"; //添加启动参数 -c  -i 127.0.0.1  -p 5002 -d G:/DE
     StartSendProcess(arguments1);//启动接收进程
 }
 
