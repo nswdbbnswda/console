@@ -20,4 +20,5 @@ HEADERS += \
     mytcpsever.h \
     cmdbase.h \
     mythread.h \
-    mainwin.h
+    mainwin.h \
+    IPMsg.h

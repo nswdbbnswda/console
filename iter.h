@@ -32,7 +32,7 @@ signals:
     void    SigAddTcpThread();
     void    AddTcp(QString);
     void    SendFile(QString,QStringList);
-
+    void    ReFresh();//刷新用户列表
 public slots:
     void    Interacter();//用户交互
 };

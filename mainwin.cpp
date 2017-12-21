@@ -5,16 +5,23 @@
 #include<QFile>
 #include<QByteArray>
 #include<QCoreApplication>
-#include<Windows.h>
 #include"iter.h"
-std::map<std::string,QTcpSocket*> MainWin::ipMap;
+#include<QTime>
+#include<QList>
+#include<QNetworkInterface>
+
+
+
+std::map<std::string,QTcpSocket*> MainWin::ipMap;l
 QReadWriteLock rwLock;
+
+
+
 
 MainWin::MainWin()
 {
     server  = NULL;
     server = new MyTcpSever;
-
     socketDescriptor = 0;
     if (!server->isListening()){//监听
         if (!server->listen(QHostAddress::AnyIPv4, 5000)){std::cout<<"open listen port fail!"<<std::endl;}
@@ -27,11 +34,16 @@ MainWin::MainWin()
 
     //交互信号与槽函数连接区域
     QObject::connect(iter,SIGNAL(SendFile(QString,QStringList)),this,SLOT(EvSendFile(QString,QStringList)));//发送文件
+    QObject::connect(iter,SIGNAL(ReFresh()),this,SLOT(EvReFresh()));//刷新用户列表
     QObject::connect(iter,SIGNAL(AddTcp(QString)),this,SLOT(EvConTcp(QString)));//当执行cad命令的时候，就执行连接TCP动作
     QObject::connect(this, SIGNAL(Sig()), iter, SLOT(Interacter())); // 这里的slot()函数，相当于run()函数的作用
 
-
     iterThread->start();
+
+
+    InitBroadcast();//初始化广播上线系统
+    BroadCast(IPMSG_BR_ENTRY);//向局域网发送广播上线消息
+
     emit Sig(); //启动命令交互线程
 }
 
@@ -54,12 +66,14 @@ void MainWin::SendControlCommand(const QString &iPAddr,const char *pCmd)
 }
 
 
+
 //析构函数
 MainWin::~MainWin()
 {
     if(server){delete server;server = NULL;}
     if(iterThread){delete iterThread; iterThread = NULL;}
     if(iter){ delete iter;  iter = NULL; }
+    if(udpSock){ delete udpSock; udpSock = NULL;}
 }
 
 
@@ -90,17 +104,14 @@ void MainWin::EvNewConnection(qintptr ptr1)
 void MainWin::StartSendProcess(const QStringList &qslt )
 {
     QString program1 = QCoreApplication::applicationDirPath() + "/AutoSend.exe";//待启动程序路径
-//    //每启动一个进程都为这个进程创建一个对象
-//    QProcess *tmp = new QProcess;
-//    connect(tmp,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(EvProExit()));//子进程启动了
-//    connect(tmp,SIGNAL(started()),this,SLOT(EvProStart()));//子进程结束了
-//    tmp->start(program1, qslt);
-//    tmp->waitForStarted();//等待进程启动
-
-      QProcess::startDetached(program1,qslt);//启动AutoSend
+    //    //每启动一个进程都为这个进程创建一个对象
+    //    QProcess *tmp = new QProcess;
+    //    connect(tmp,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(EvProExit()));//子进程启动了
+    //    connect(tmp,SIGNAL(started()),this,SLOT(EvProStart()));//子进程结束了
+    //    tmp->start(program1, qslt);
+    //    tmp->waitForStarted();//等待进程启动
+    QProcess::startDetached(program1,qslt);//启动AutoSend
 }
-
-
 
 
 
@@ -116,7 +127,7 @@ bool MainWin::EvConTcp(QString qstrIp)
     QTcpSocket *pSocket = new QTcpSocket;
     pSocket->connectToHost(qstrIp.toStdString().c_str(),5000);//尝试用这个连接这个IP地址
     if(pSocket->waitForConnected()){//如果连接成功
-        std::cout<<"Successfully connected to "<<qstrIp.toStdString().c_str()<<"!"<<std::endl;//提示连接成功
+        //std::cout<<"Successfully connected to "<<qstrIp.toStdString().c_str()<<"!"<<std::endl;//提示连接成功
         ipMap[qstrIp.toStdString()] = pSocket;//把这个指针加入到map中
         QObject::connect(ipMap[qstrIp.toStdString()],SIGNAL(readyRead()),this,SLOT(EvReceiveCommand()));//把每一个主动连接的套接字都连接到接收槽上
         QObject::connect(ipMap[qstrIp.toStdString()],SIGNAL(disconnected()),this,SLOT(EvLeaveProc()));//断开连接处理
@@ -127,7 +138,7 @@ bool MainWin::EvConTcp(QString qstrIp)
 }
 
 
-//处理"sf"事件
+//启动发送文件进程以及给对侧主机发送用于发送数据的端口号
 void MainWin::EvSendFile(QString qstrIpAddr,QStringList qstrContext)
 {
     if(!IsIpExist(qstrIpAddr)){//如果map中没有这个地址,退出
@@ -159,9 +170,8 @@ void MainWin::EvLeaveProc()
 //子进程启动了
 void MainWin::EvProStart()
 {
- qDebug()<<"正在传输文件...";
+    qDebug()<<"正在传输文件...";
 }
-
 
 
 
@@ -177,7 +187,6 @@ void MainWin::EvProExit()
 //接收指令
 void MainWin::EvReceiveCommand()
 {
-
     //接收短消息 并且解析出IP地址和端口号码
     QTcpSocket *socket = (QTcpSocket *)sender();//获得信号的发送者
     QHostAddress ipaddr = socket->peerAddress();//获取客户端的IP地址
@@ -189,6 +198,158 @@ void MainWin::EvReceiveCommand()
     arguments1 <<"-c"<<"-i"<<ipaddr.toString()<<"-p"<<temp1.data()<<"-d"<<QCoreApplication::applicationDirPath() + "/DOWNLOAD"; //添加启动参数 -c  -i 127.0.0.1  -p 5002 -d G:/DE
     StartSendProcess(arguments1);//启动接收进程
 }
+
+
+
+
+//初始化UDP
+void MainWin::InitBroadcast()
+{
+    udpSock = new QUdpSocket(this);//创建一个UDP套接字
+    udpSock->bind(DEST_PORT,QUdpSocket::ShareAddress); //绑定LOCAL_PORT端口作为数据输出口
+    connect(udpSock,SIGNAL(readyRead()),this,SLOT(EvUdp()));//收到广播消息进行处理
+}
+
+
+
+//进行广播
+void MainWin::BroadCast(ULONG mode)
+{
+    //制作数据报
+    char buf[20];
+    MakeMsg(buf,mode);
+    QByteArray datagram = QByteArray(buf);
+    //发送数据报
+    udpSock->writeDatagram(datagram.data(),datagram.size(),QHostAddress::Broadcast,DEST_PORT);//向网络上所有主机的12811端口发送数据
+}
+
+
+
+
+
+
+//接收数据报
+void MainWin::EvUdp()
+{
+    QHostAddress client_address;//声明一个QHostAddress对象用于保存发送端的信息
+
+    while(udpSock->hasPendingDatagrams())
+    {
+        quint16 recPort = 0;
+        QByteArray datagram;
+        datagram.resize(udpSock->pendingDatagramSize());//datagram大小为等待处理数据报的大小才能接收数据;
+        udpSock->readDatagram(datagram.data(),datagram.size(), &client_address, &recPort);//接收数据报
+
+        //查看一下是什么指令
+        switch(atol(datagram.data()))
+        {
+        case IPMSG_BR_ENTRY:
+        {
+            if(FilterGetIp(client_address.toString())){//有网络上的其他主机上线
+                MsgBrEntry(IPMSG_ANSENTRY,client_address);//给该主机回复"我在"消息
+
+                if( -1 == ipList.indexOf(client_address.toString())){//看看我的IP列表中没有该IP
+                    ipList.append(client_address.toString());//把它添加到我的IP列表中
+                  //  qDebug()<<client_address.toString();
+                }
+            }
+        }
+            break;
+        case IPMSG_ANSENTRY:
+            if(FilterGetIp(client_address.toString()))//过滤发给自己的消息
+            {
+                if( -1 == ipList.indexOf(client_address.toString())){//链表中不存在这个地址
+                    ipList.append(client_address.toString());//把地址插入到链表
+                    //qDebug()<<client_address.toString();//表示这是网络中处于在线状态的一个主机，并且本机第一次与该机进行建立通讯连接
+                    //发起TCP连接
+                     EvConTcp(client_address.toString());
+
+                }
+            }
+            break;
+        }
+    }
+
+}
+
+//刷新用户列表
+void MainWin::EvReFresh()
+{
+    BroadCast(IPMSG_BR_ENTRY);//向局域网发送广播上线消息
+}
+
+//制作消息包
+void MainWin::MakeMsg(char *buf,ULONG command)
+{
+    int			cmd = GET_MODE(command);//把ULONG类型通过宏转换成整型数
+    bool		is_br_cmd =	cmd == IPMSG_BR_ENTRY ||//如果命令是IPMSG_BR_ENTRY，IPMSG_BR_EXIT，IPMSG_BR_ABSENCE，
+            cmd == IPMSG_BR_EXIT  ||//IPMSG_NOOPERATION四个之中的其中一个该表达式的值就为真
+            cmd == IPMSG_BR_ABSENCE ||
+            cmd == IPMSG_NOOPERATION ? true : false;
+    sprintf(buf, "%u",command);//制作格式化UDP 数据
+}
+
+
+//回复"我在"消息
+void MainWin::MsgBrEntry(const ULONG mode,const QHostAddress &_ip)
+{
+    AnswerMsg(mode,_ip);
+}
+
+
+
+//收到了别人发给本机的"我在"消息
+void MainWin::MsgAnsEntry()
+{
+
+}
+
+
+//过滤IP
+bool MainWin::FilterGetIp(const QString &_ip)
+{
+    //使用allAddresses命令获得所有的ip地址
+    QList<QHostAddress> list = QNetworkInterface::allAddresses();
+    //对找到的每一个IP地址进行比对
+    foreach (QHostAddress address,list)
+    {
+        if(address.protocol() == QAbstractSocket::IPv4Protocol && address.toString() == _ip)
+            return false;//如果本机所有的IPV4地址都不与传过来的这个IP地址相当，那么就说明该IP地址是一个其他主机的IPV4地址
+    }
+    return true;
+}
+
+
+//回复消息
+void MainWin::AnswerMsg(const ULONG mode,const QHostAddress & _ip)
+{
+    //制作数据报
+    char buf[20];
+    MakeMsg(buf,mode);
+    QByteArray datagram = QByteArray(buf);
+    //发送数据报
+    udpSock->writeDatagram(datagram.data(),datagram.size(),_ip,DEST_PORT);//给发来UDP广播消息的主机进行回复
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

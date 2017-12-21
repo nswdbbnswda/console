@@ -10,8 +10,6 @@ Iter::Iter()
 
 Iter::~Iter()
 {
-
-
    if(addConThread){
        delete addConThread;
        addConThread = NULL;
@@ -36,24 +34,25 @@ void Iter::Interacter()
         if (!strcmp(com, "list") ||
                 !strcmp(com, "ls"))
         {
-                  //显示所有的TCP连接
-                  if(MainWin::GetInstance()->ShowIpList()){
-                    }
-                  else{
+            //显示所有的TCP连接
+            if(MainWin::GetInstance()->ShowIpList()){
+            }
+            else{
 
-                      std::cout<<"No connecting ip!"<<std::endl;
+                std::cout<<"No connecting ip!"<<std::endl;
 
-                  }
+            }
         }
         else if (!strcmp(com, "quit") ||
                  !strcmp(com, "q"))
         {
-        QCoreApplication::exit(0);//退出进程
+            QCoreApplication::exit(0);//退出进程
         }
         else if (!strcmp(com, "refresh") ||
                  !strcmp(com, "rf"))
         {
-
+            //刷新用户列表
+              emit ReFresh();
         }
         else if (!strcmp(com, "talk") ||
                  !strcmp(com, "tk"))
@@ -90,16 +89,14 @@ void Iter::Interacter()
         {
 
         }
-
-
         else if (!strcmp(com, "cad") ||
                  !strcmp(com, "c"))
         {
-          std::cout<<"IP:";
-          std::string ipAddr;
-          std::getline(std::cin,ipAddr);//获得IP地址
-          QString qstrip = QString::fromStdString(ipAddr);
-          emit AddTcp(qstrip);//发送给主体IP地址
+            std::cout<<"IP:";
+            std::string ipAddr;
+            std::getline(std::cin,ipAddr);//获得IP地址
+            QString qstrip = QString::fromStdString(ipAddr);
+            emit AddTcp(qstrip);//发送给主体IP地址
 
         }
         else if (!strcmp(com, "help") ||
@@ -134,7 +131,6 @@ void Iter::Interacter()
     }
 
 }
-
 
 
 void Iter::TransfStr(char *dest, int flag)
