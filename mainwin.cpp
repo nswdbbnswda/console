@@ -11,8 +11,7 @@
 #include<QNetworkInterface>
 
 
-
-std::map<std::string,QTcpSocket*> MainWin::ipMap;l
+std::map<std::string,QTcpSocket*> MainWin::ipMap;
 QReadWriteLock rwLock;
 
 
@@ -163,11 +162,11 @@ void MainWin::EvLeaveProc()
 
     delete ipMap[ipaddr.toString().toStdString()];//释放套接字
     ipMap.erase(ipaddr.toString().toStdString());//把这个元素从map中移除  //内存尚未释放
+    ipList.removeAt(ipList.indexOf(ipaddr.toString()));//把UDP地址链表中的该下线主机地址也给清理掉
 }
 
 
-
-//子进程启动了
+  //子进程启动了
 void MainWin::EvProStart()
 {
     qDebug()<<"正在传输文件...";
